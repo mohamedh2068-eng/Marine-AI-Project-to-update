@@ -8,67 +8,22 @@ from sklearn.preprocessing import StandardScaler
 # ================= PAGE =================
 st.set_page_config(page_title="AI Marine Twin", layout="wide")
 
-# ================= INTRO SCREEN =================
-if "start" not in st.session_state:
-    st.session_state.start = False
+# ================= INTRO (CLEAN & PROFESSIONAL) =================
+st.title("⚓ AI Marine Propeller System")
 
-if not st.session_state.start:
+st.image(
+    "https://images.unsplash.com/photo-1548574505-5e239809ee19",
+    use_container_width=True
+)
 
-    st.markdown("""
-    <style>
-    .hero {
-        text-align:center;
-        padding:60px;
-        border-radius:25px;
-        background: linear-gradient(135deg, #0f172a, #020617);
-        box-shadow: 0 0 60px rgba(0,234,255,0.25);
-    }
+st.markdown("""
+### 👨‍💻 محمد أشرف حسين دسوقي  
+### 🎓 إشراف: د. حسين المصري  
+### 🏫 جامعة شرق بورسعيد التكنولوجية  
+### 🧭 تكنولوجيا تشغيل وصيانة السفن  
+""")
 
-    .title {
-        font-size:48px;
-        color:#00eaff;
-        font-weight:800;
-        margin-bottom:10px;
-    }
-
-    .sub {
-        color:#94a3b8;
-        font-size:18px;
-        margin-bottom:20px;
-    }
-
-    .card {
-        display:inline-block;
-        padding:20px;
-        border-radius:15px;
-        border:1px solid #00eaff;
-        color:white;
-        line-height:1.8;
-        background: rgba(255,255,255,0.03);
-    }
-    </style>
-
-    <div class="hero">
-        <div class="title">⚓ AI Marine Propeller System</div>
-        <div class="sub">Digital Twin • CFD Simulation • AI Engineering Design</div>
-
-        <img src="https://images.unsplash.com/photo-1548574505-5e239809ee19"
-             style="width:80%; border-radius:15px; margin-bottom:20px;">
-
-        <div class="card">
-            👨‍💻 <b>محمد أشرف حسين دسوقي</b><br>
-            🎓 إشراف: د. حسين المصري<br>
-            🏫 جامعة شرق بورسعيد التكنولوجية<br>
-            🧭 تكنولوجيا تشغيل وصيانة السفن
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if st.button("🚀 دخول النظام"):
-        st.session_state.start = True
-        st.rerun()
-
-    st.stop()
+st.markdown("---")
 
 # ================= AI MODEL =================
 X = np.array([
@@ -96,7 +51,6 @@ blades = st.sidebar.selectbox("Blades", [3,4,5,6])
 pitch = st.sidebar.slider("Pitch", 0.1, 3.0, 1.2)
 rpm = st.sidebar.slider("RPM", 100, 3000, 1500)
 
-# ================= PREDICTION =================
 inp = scaler.transform([[diameter, speed, blades, rpm]])
 eff = model.predict(inp)[0]
 
@@ -105,8 +59,8 @@ st.metric("⚡ Efficiency", f"{eff*100:.2f}%")
 # ================= TABS =================
 tab1, tab2, tab3 = st.tabs([
     "📊 Data",
-    "🧊 3D Animation",
-    "🌊 Flow Simulation"
+    "🔄 Propeller Motion",
+    "🌊 Flow"
 ])
 
 # ================= TAB 1 =================
@@ -118,59 +72,52 @@ with tab1:
     c3.metric("Speed", f"{speed} knots")
     c4.metric("RPM", rpm)
 
-# ================= TAB 2 (ANIMATED 3D) =================
+# ================= TAB 2 (REAL MOTION SIMULATION) =================
 with tab2:
-    st.subheader("🧊 Real-Time Animated Propeller")
+    st.subheader("🔄 Realistic Propeller Motion (Simulation)")
 
-    theta = np.linspace(0, 2*np.pi, 120)
-    r = np.linspace(0.2, 1.2, 120)
-    theta, r = np.meshgrid(theta, r)
-
-    x = r * np.cos(theta)
-    y = r * np.sin(theta)
-
-    blade = np.sin(theta * 2) * (1 - r)
-    z = 0.25 * blade
-
-    speed_ctrl = st.slider("Rotation Speed", 0.0, 5.0, 1.5)
+    speed_ctrl = st.slider("Rotation Speed Control", 0.1, 5.0, 1.5)
 
     fig = go.Figure()
 
-    for i in range(blades):
-
-        base_angle = i * 2*np.pi/blades
-
-        # static blade shape
-        xr = x*np.cos(base_angle) - y*np.sin(base_angle)
-        yr = x*np.sin(base_angle) + y*np.cos(base_angle)
-
-        # animation rotation effect
-        rot = speed_ctrl
-
-        x_final = xr*np.cos(rot) - yr*np.sin(rot)
-        y_final = xr*np.sin(rot) + yr*np.cos(rot)
-
-        fig.add_trace(go.Surface(
-            x=x_final,
-            y=y_final,
-            z=z,
-            colorscale="Turbo",
-            showscale=False,
-            opacity=0.95
-        ))
-
-    # water surface
-    wx = np.linspace(-2,2,30)
-    wy = np.linspace(-2,2,30)
+    # WATER SURFACE
+    wx = np.linspace(-2,2,25)
+    wy = np.linspace(-2,2,25)
     WX, WY = np.meshgrid(wx,wy)
-    WZ = np.zeros_like(WX) - 0.4
+    WZ = np.zeros_like(WX) - 0.5
 
     fig.add_trace(go.Surface(
-        x=WX, y=WY, z=WZ,
-        colorscale=[[0,"#0ea5e9"],[1,"#0369a1"]],
+        x=WX,
+        y=WY,
+        z=WZ,
+        colorscale=[[0,"#0ea5e9"],[1,"#075985"]],
         opacity=0.5,
         showscale=False
     ))
+
+    # PROPELLER MOTION (REALISTIC LOOPED CURVE)
+    t = np.linspace(0, 2*np.pi, 200)
+
+    for i in range(blades):
+
+        base_angle = i * (2*np.pi/blades) + speed_ctrl
+
+        # realistic blade shape (simple engineering curve)
+        x = np.cos(t) * (1 - t/(2*np.pi))
+        y = np.sin(t) * (1 - t/(2*np.pi))
+        z = 0.2 * np.sin(2*t)
+
+        # rotation
+        xr = x*np.cos(base_angle) - y*np.sin(base_angle)
+        yr = x*np.sin(base_angle) + y*np.cos(base_angle)
+
+        fig.add_trace(go.Scatter3d(
+            x=xr,
+            y=yr,
+            z=z,
+            mode='lines',
+            line=dict(color="#00eaff", width=6)
+        ))
 
     fig.update_layout(
         template="plotly_dark",
@@ -186,7 +133,7 @@ with tab2:
 
 # ================= TAB 3 =================
 with tab3:
-    st.subheader("🌊 Flow Simulation")
+    st.subheader("🌊 Flow Field Simulation")
 
     n = 70
     x = np.linspace(-2,2,n)
@@ -199,7 +146,7 @@ with tab3:
 
     fig2, ax = plt.subplots()
     ax.streamplot(X, Y, U, V, color=np.sqrt(U**2+V**2), cmap="plasma")
-    ax.set_title("Pseudo CFD Flow Field")
+    ax.set_title("Water Flow Simulation")
     st.pyplot(fig2)
 
 # ================= FOOTER =================
