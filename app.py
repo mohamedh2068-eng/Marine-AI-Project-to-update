@@ -1,113 +1,107 @@
 import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.preprocessing import StandardScaler
 
-# 1. إعدادات الصفحة الفخمة
-st.set_page_config(page_title="M.AFixly Ultra | Marine Simulation", layout="wide")
+# --- إعدادات الصفحة ---
+st.set_page_config(page_title="M.AFixly | Marine Digital Twin", layout="wide")
 
-# منع الترجمة والستايل الاحترافي
+# ستايل احترافي (Dark Navy & Gold)
 st.markdown("""
     <style>
-    .main { background: radial-gradient(circle, #1e293b 0%, #0f172a 100%); color: #f8fafc; }
-    .stMetric { border-radius: 20px; background: rgba(255, 255, 255, 0.03); border: 1px solid #fbbf24; backdrop-filter: blur(10px); }
-    .notranslate { translate: no !important; }
+    .main { background-color: #020617; color: white; }
+    .stMetric { background: #1e293b; border-radius: 10px; border-top: 4px solid #fbbf24; }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. الهيدر السينمائي
-st.markdown("""
-    <div style="text-align: center; padding: 20px; border-bottom: 2px solid #fbbf24;" class="notranslate">
-        <h1 style="color: #fbbf24; font-size: 3em; text-shadow: 2px 2px #000;">M.AFIXLY ULTRA</h1>
-        <p style="font-size: 1.5em; letter-spacing: 2px;">MARINE AI DIGITAL TWIN SYSTEM</p>
-        <div style="display: flex; justify-content: center; gap: 50px; margin-top: 10px;">
-            <p>👨‍🎓 <b>Eng. Mohamed Ashraf</b></p>
-            <p>👨‍🏫 <b>Supervised by: Prof. Hussein El-Masry</b></p>
-        </div>
+# --- الهيدر (تحت إشراف د. حسين المصري) ---
+st.markdown(f"""
+    <div style="text-align: center; border: 2px solid #fbbf24; padding: 20px; border-radius: 20px;">
+        <h1 style="color: #fbbf24;">M.AFixly: AI Propeller & CNC System</h1>
+        <p>جامعة شرق بورسعيد التكنولوجية | إعداد: <b>محمد أشرف حسين</b></p>
+        <p>إشراف: <b>أ.د/ حسين المصري</b></p>
     </div>
     """, unsafe_allow_html=True)
 
-# 3. لوحة التحكم (Sidebar)
+# --- لوحة التحكم (نفس فكرة الموقع اللي بعته) ---
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/2830/2830305.png", width=80)
-    st.title("🎛️ Live Controls")
-    diam = st.slider("Propeller Diameter (D)", 0.5, 12.0, 3.5)
-    speed = st.slider("Ship Speed (V)", 5, 65, 28)
-    rpm = st.slider("Engine RPM", 100, 3500, 1800)
-    blades = st.select_slider("Blades", options=[3, 4, 5, 6, 7])
+    st.header("🚢 تصنيف الأسطول")
+    fleet_type = st.selectbox("اختار نوع السفينة", 
+        ["سفن بضائع (Bulk Carrier)", "ناقلات نفط (Tankers)", "يخوت سريعة (Fast Yachts)", "غواصات (Submarines)"])
     
-# 4. محرك المحاكاة والذكاء الاصطناعي (Advanced Engine)
-def compute_dynamics(d, s, r, b):
-    # معادلات هيدروديناميكية متطورة لتوليد بيانات واقعية
-    advance_ratio = (s * 0.514) / ((r/60) * d)
-    efficiency = 0.86 - (advance_ratio * 0.15) - (speed * 0.002)
-    thrust = (d**2.5) * (r/1000)**2 * 0.45
-    loss = (thrust * 0.03) + (rpm * 0.001) # Power loss in bearings
-    return np.clip(efficiency, 0.35, 0.91), thrust, loss
-
-eff, thr, loss = compute_dynamics(diam, speed, rpm, blades)
-
-# 5. عرض النتائج (Dashboard)
-col1, col2, col3 = st.columns(3)
-col1.metric("System Efficiency", f"{eff*100:.1f}%", delta="AI Optimized")
-col2.metric("Thrust Output", f"{thr:.2f} kN")
-col3.metric("Bearing Power Loss", f"{loss:.2f} kW", delta_color="inverse")
-
-# 6. المحاكي الـ 3D السينمائي (High-End Simulation)
-st.markdown("### 🌊 Real-Time Propeller Simulation & Wake Flow")
-
-# توليد شكل الرفاص (Solid 3D Surfaces)
-fig = go.Figure()
-
-# رسم الريش كـ "Solid Shells"
-for i in range(blades):
-    theta = i * (2 * np.pi / blades)
-    r_vals = np.linspace(0.2, diam/2, 30)
-    phi_vals = np.linspace(0, np.pi/4, 30)
-    R, PHI = np.meshgrid(r_vals, phi_vals)
+    st.header("📏 أبعاد الرفاص")
+    diameter = st.slider("القطر (D - Meters)", 0.5, 8.0, 3.5)
+    speed = st.slider("السرعة (V - Knots)", 5, 45, 18)
+    blades = st.select_slider("عدد الريش (Blades)", options=[3, 4, 5, 6])
     
-    # انحناء الريشة (Pitch & Skew)
-    X = R * np.cos(PHI + theta)
-    Y = R * np.sin(PHI + theta)
-    Z = 0.3 * R * np.sin(3 * PHI) # Pitch effect
+    st.divider()
+    if st.button("🚀 توليد وتصنيع (Generate & CNC)"):
+        st.toast("جاري معالجة البيانات بالذكاء الاصطناعي...")
+
+# --- محرك الحسابات (AI Engine) ---
+# حسابات تتغير بناءً على نوع السفينة
+def calculate_propeller_logic(f_type, d, s, b):
+    base_eff = 0.82
+    if "Yachts" in f_type: base_eff = 0.88 # اليخوت أكفأ في السرعات العالية
+    elif "Submarines" in f_type: base_eff = 0.78 # الغواصات تركز على الهدوء
     
-    fig.add_trace(go.Surface(
-        x=X, y=Y, z=Z,
-        colorscale='Viridis', opacity=0.9, showscale=False
-    ))
+    efficiency = base_eff - (s * 0.002) - (b * 0.005)
+    thrust = (d**2.2) * (s**1.1) * 0.5
+    return round(efficiency*100, 1), round(thrust, 2)
 
-# إضافة جزيئات التدفق (Dynamic Particle Wake)
-for p in range(15):
-    p_theta = p * (2 * np.pi / 15)
-    z_wake = np.linspace(0, 8, 100)
-    x_wake = (diam/2) * np.cos(z_wake * (rpm/500) + p_theta)
-    y_wake = (diam/2) * np.sin(z_wake * (rpm/500) + p_theta)
+eff, thrust = calculate_propeller_logic(fleet_type, diameter, speed, blades)
+
+# --- شاشة الماكينة والنتائج ---
+col_stats, col_sim = st.columns([1, 2])
+
+with col_stats:
+    st.subheader("📟 CNC Status")
+    st.metric("Efficiency", f"{eff}%")
+    st.metric("Thrust Force", f"{thrust} kN")
     
-    fig.add_trace(go.Scatter3d(
-        x=x_wake, y=y_wake, z=-z_wake,
-        mode='lines', line=dict(color='#00e5ff', width=2, dash='solid'),
-        opacity=0.3
-    ))
+    st.info(f"Target: {fleet_type}")
+    
+    # محاكاة كود الـ CNC بشكل حي
+    st.markdown("**G-Code Stream:**")
+    st.code(f"G01 X{diameter*10} Y0 Z-5\nG90 G21 F150\nM03 S1200\n(Blades: {blades})", language="gcode")
 
-fig.update_layout(
-    scene=dict(
-        xaxis_visible=False, yaxis_visible=False, zaxis_visible=False,
-        bgcolor="#0b0f19",
-        camera=dict(eye=dict(x=1.2, y=1.2, z=0.5))
-    ),
-    margin=dict(l=0, r=0, b=0, t=0), height=700
-)
-st.plotly_chart(fig, use_container_width=True)
+with col_sim:
+    st.subheader("🧊 3D Digital Twin")
+    
+    # تحريك الرفاص (الخيار الثاني المطور)
+    st.components.v1.html(f"""
+        <div id="3d-div" style="width:100%; height:450px; background: #0f172a; border-radius: 15px;"></div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <script>
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth / 450, 0.1, 1000);
+            const renderer = new THREE.WebGLRenderer({{ antialias: true, alpha: true }});
+            renderer.setSize(document.getElementById('3d-div').clientWidth, 450);
+            document.getElementById('3d-div').appendChild(renderer.domElement);
 
-# 7. التقرير الذكي وكود التصنيع
-with st.expander("🛠️ Advanced Manufacturing Data (CNC & Metallurgy)"):
-    st.write("---")
-    st.markdown(f"""
-    **AI Material Recommendation:** Nickel-Aluminum Bronze (NAB)  
-    **G-Code Status:** Generated for {blades}-Axis CNC  
-    **Structural Fatigue Prediction:** Low Risk
-    """)
-    st.code(f"M03 S{rpm}\nG01 X{diam*10} Y0 Z-10 F150\n(Propeller Optimized Path)", language="gcode")
+            const group = new THREE.Group();
+            // تغيير اللون بناءً على النوع (ذهبي للنحاس، فضي للاستانلس)
+            const matColor = "{'#fbbf24' if 'Yachts' not in fleet_type else '#e2e8f0'}";
+            const material = new THREE.MeshPhongMaterial({{ color: matColor, shininess: 100, side: THREE.DoubleSide }});
+            
+            for(let i=0; i<{blades}; i++) {{
+                // تغيير شكل الريشة (TorusKnot كتمثيل فني للريشة)
+                const geometry = new THREE.TorusKnotGeometry(1, 0.3, 100, 16, 1, {blades});
+                const blade = new THREE.Mesh(geometry, material);
+                blade.rotation.z = (i * Math.PI * 2) / {blades};
+                group.add(blade);
+            }}
+            scene.add(group);
+            scene.add(new THREE.PointLight(0xffffff, 1, 100).position.set(5,5,5) && new THREE.AmbientLight(0x404040));
+            camera.position.z = 4;
 
-st.markdown("<p style='text-align: center; color: #475569;'>M.AFixly Final Version 2026 - Masterpiece Edition</p>", unsafe_allow_html=True)
+            function animate() {{
+                requestAnimationFrame(animate);
+                group.rotation.z += {speed / 1000}; // السرعة مرتبطة بالواقع
+                renderer.render(scene, camera);
+            }}
+            animate();
+        </script>
+    """, height=470)
+
+st.markdown("---")
+st.caption("M.AFixly System v2.0 - Developed for Port Said Technological University")
