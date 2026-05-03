@@ -1,98 +1,205 @@
 import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
+from sklearn.linear_model import LinearRegression
 
-# 1. إعدادات الحماية والـ UI
-st.set_page_config(page_title="M.AFixly Pro | Marine AI", layout="wide")
+# =========================
+# إعداد الصفحة
+# =========================
+st.set_page_config(
+    page_title="M.AFixly - Marine AI Pro",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
+# =========================
+# CSS احترافي (Glass UI)
+# =========================
 st.markdown("""
-    <style>
-    .main { background-color: #0f172a; }
-    .stMetric { background: #1e293b; padding: 20px; border-radius: 12px; border-left: 5px solid #fbbf24; }
-    .header-card {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        padding: 30px; border-radius: 20px; border: 1px solid #334155; text-align: center; margin-bottom: 25px;
-    }
-    </style>
-    <meta name="google" content="notranslate">
-    """, unsafe_allow_html=True)
+<style>
+.main {
+    background: linear-gradient(135deg, #0f172a, #020617);
+}
+.block-container {
+    padding-top: 2rem;
+}
+.stMetric {
+    background: rgba(30, 41, 59, 0.7);
+    padding: 15px;
+    border-radius: 12px;
+    border-bottom: 3px solid #fbbf24;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.header-box {
+    text-align: center;
+    padding: 25px;
+    background: linear-gradient(90deg, #1e293b, #020617);
+    border-radius: 15px;
+    margin-bottom: 25px;
+}
+</style>
+""", unsafe_allow_html=True)
 
-# 2. الهيدر (تحت إشراف أ.د/ حسين المصري)
-st.markdown(f"""
-    <div class="header-card">
-        <h1 style='color: #fbbf24; margin:0;'>M.AFixly: Marine AI Platform</h1>
-        <p style='color: white;'>جامعة شرق بورسعيد التكنولوجية | الطالب: محمد أشرف حسين</p>
-        <p style='color: #fbbf24; font-weight: bold;'>تحت إشراف: أ.د/ حسين المصري</p>
-    </div>
-    """, unsafe_allow_html=True)
+# =========================
+# Header
+# =========================
+st.markdown("""
+<div class="header-box">
+    <h1 style='color:#fbbf24;'>M.AFixly: Marine AI & Propeller System</h1>
+    <p style='color:#94a3b8;'>AI + Hydrodynamics + CNC Integration</p>
+</div>
+""", unsafe_allow_html=True)
 
-# 3. لوحة التحكم
+# =========================
+# Sidebar
+# =========================
 with st.sidebar:
-    st.header("⚙️ Configuration")
-    d_m = st.slider("Propeller Diameter (m)", 0.5, 8.0, 3.0)
-    v_k = st.slider("Speed (Knots)", 5, 60, 25)
-    blades = st.select_slider("Number of Blades", options=[3, 4, 5, 6])
-    st.info("AI Predictor Active")
+    st.header("⚙️ Engineering Inputs")
 
-# 4. التبويبات (إضافة الـ 3D هنا)
-tab1, tab2, tab3 = st.tabs(["📊 Performance", "🎮 3D Simulation", "🤖 CNC Data"])
+    d_input = st.number_input("Diameter (m)", 0.5, 15.0, 2.5)
+    v_input = st.slider("Speed (knots)", 5, 60, 22)
+    blades = st.select_slider("Blades", options=[3, 4, 5, 6])
 
+    ship_type = st.selectbox("Ship Type", ["Cargo", "Tanker", "Passenger"])
+
+    material = st.selectbox("Material", [
+        "Nickel-Alu Bronze",
+        "Stainless Steel 316L",
+        "Manganese Bronze"
+    ])
+
+# =========================
+# AI Model (ML حقيقي)
+# =========================
+X = np.array([
+    [2.5, 22, 4],
+    [3.0, 25, 5],
+    [2.0, 18, 3],
+    [2.8, 30, 4]
+])
+y = np.array([0.75, 0.72, 0.80, 0.70])
+
+model = LinearRegression().fit(X, y)
+
+eff = model.predict([[d_input, v_input, blades]])[0]
+
+# =========================
+# حسابات
+# =========================
+v_ms = v_input * 0.5144
+thrust = (d_input**2) * (v_ms**2) * 0.55
+
+# =========================
+# Tabs
+# =========================
+tab1, tab2, tab3 = st.tabs([
+    "📊 Performance",
+    "🧊 3D Model",
+    "📋 Report"
+])
+
+# =========================
+# TAB 1
+# =========================
 with tab1:
-    eff = 0.84 - (v_k * 0.003)
-    thrust = (d_m**2) * (v_k**1.2) * 0.4
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Efficiency (η)", f"{eff*100:.1f}%")
-    c2.metric("Thrust", f"{thrust:.2f} kN")
-    c3.metric("Cavitation", "SAFE" if v_k < 35 else "RISK")
-    
-    # الرسم البياني
-    j = np.linspace(0.1, 1.2, 30)
-    kt = 0.5 - 0.3 * j
-    fig = go.Figure(go.Scatter(x=j, y=kt, line=dict(color='#fbbf24', width=3)))
-    fig.update_layout(template="plotly_dark", height=300)
+
+    col1, col2, col3 = st.columns(3)
+
+    col1.metric("Efficiency", f"{eff*100:.2f}%")
+    col2.metric("Thrust", f"{thrust:.2f} kN")
+    col3.metric("Efficiency Gap", f"{(0.9-eff)*100:.2f}%")
+
+    # Alerts
+    if v_input > 35:
+        st.error("⚠ High Cavitation Risk")
+    elif v_input > 28:
+        st.warning("⚠ Moderate Risk")
+    else:
+        st.success("✅ Safe Operation")
+
+    # صورة حقيقية
+    st.image(
+        "https://upload.wikimedia.org/wikipedia/commons/6/6b/Ship_propeller.jpg",
+        caption="Real Marine Propeller"
+    )
+
+    # منحنى الأداء
+    st.subheader("Performance Curve")
+
+    j = np.linspace(0.1, 1.0, 20)
+    kt = 0.5 - 0.4 * j
+
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=j, y=kt, mode='lines+markers'))
+
+    fig.update_layout(template="plotly_dark", height=400)
+
     st.plotly_chart(fig, use_container_width=True)
 
+# =========================
+# TAB 2 (3D احترافي)
+# =========================
 with tab2:
-    st.markdown("### 🧊 Interactive Propeller Model")
-    # محاكي 3D مطور ومستقر جداً
-    st.components.v1.html(f"""
-    <div id="3d-area" style="width:100%; height:400px; background:#000; border-radius:15px;"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/400, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({{antialias: true, alpha: true}});
-        renderer.setSize(document.getElementById('3d-area').clientWidth, 400);
-        document.getElementById('3d-area').appendChild(renderer.domElement);
 
-        const group = new THREE.Group();
-        const mat = new THREE.MeshPhongMaterial({{ color: 0xfbbf24, shininess: 100 }});
-        
-        // رسم الريش ديناميكياً
-        for(let i=0; i<{blades}; i++) {{
-            const geom = new THREE.TorusGeometry(1.2, 0.3, 16, 100);
-            const blade = new THREE.Mesh(geom, mat);
-            blade.rotation.y = (i * Math.PI * 2) / {blades};
-            group.add(blade);
-        }}
-        scene.add(group);
-        
-        const light = new THREE.PointLight(0xffffff, 1, 100);
-        light.position.set(5, 5, 5);
-        scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040));
-        camera.position.z = 5;
+    st.subheader("3D Propeller Simulation")
 
-        function animate() {{
-            requestAnimationFrame(animate);
-            group.rotation.z += 0.02;
-            renderer.render(scene, camera);
-        }}
-        animate();
-    </script>
-    """, height=420)
+    theta = np.linspace(0, 2*np.pi, 100)
+    z = np.linspace(-1, 1, 100)
+    theta, z = np.meshgrid(theta, z)
 
+    r = 1 + 0.3 * np.sin(blades * theta)
+
+    x = r * np.cos(theta)
+    y = r * np.sin(theta)
+
+    fig = go.Figure(data=[go.Surface(x=x, y=y, z=z)])
+
+    fig.update_layout(template="plotly_dark", height=500)
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# =========================
+# TAB 3
+# =========================
 with tab3:
-    st.code(f"G01 X{d_m*10} Y0 Z-5 F200 \n(Generated for {blades} Blades)", language="gcode")
 
-st.caption("M.AFixly System © 2026")
+    st.subheader("Project Report")
+
+    st.write(f"""
+    **Ship Type:** {ship_type}  
+    **Material:** {material}  
+    **Diameter:** {d_input} m  
+    **Speed:** {v_input} knots  
+    **Blades:** {blades}  
+
+    ---
+    **Efficiency:** {eff:.2f}  
+    **Thrust:** {thrust:.2f} kN  
+    """)
+
+    # Export
+    if st.button("Export Report"):
+        with open("report.txt", "w") as f:
+            f.write(f"""
+M.AFixly Report
+
+Ship Type: {ship_type}
+Material: {material}
+Diameter: {d_input}
+Speed: {v_input}
+Blades: {blades}
+
+Efficiency: {eff}
+Thrust: {thrust}
+""")
+        st.success("Report Saved Successfully!")
+
+# =========================
+# Footer
+# =========================
+st.markdown("""
+<hr>
+<p style='text-align:center;color:gray;'>
+© 2026 M.AFixly Marine Systems
+</p>
+""", unsafe_allow_html=True)
