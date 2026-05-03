@@ -1,4 +1,6 @@
 streamlit
-plotly
 numpy
+plotly
+matplotlib
 scikit-learn
+joblib
