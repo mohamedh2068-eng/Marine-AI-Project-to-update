@@ -1,41 +1,47 @@
 import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
-import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 import random
 
 # ================= PAGE =================
-st.set_page_config(page_title="AI Marine Pro System", layout="wide")
+st.set_page_config(page_title="Marine AI Cinema System", layout="wide")
 
-# ================= INTRO =================
+# ================= CINEMATIC INTRO =================
 if "start" not in st.session_state:
     st.session_state.start = False
 
 if not st.session_state.start:
 
-    st.title("🚢 AI Marine Propeller Optimization PRO")
+    st.markdown("<h1 style='text-align:center;'>⚓ Marine AI Propeller System</h1>", unsafe_allow_html=True)
 
     st.image(
-        "https://images.unsplash.com/photo-1548574505-5e239809ee19",
+        "https://images.unsplash.com/photo-1581091215367-59ab6c0a5f7e",
         use_container_width=True
     )
 
     st.markdown("""
-    ### 👨‍🎓 محمد أشرف حسين دسوقي  
-    ### 🏫 جامعة شرق بورسعيد التكنولوجية  
-    ### 🧭 قسم تكنولوجيا تشغيل وصيانة السفن  
-    ### 🎓 إشراف: د. حسين المصري  
-    """)
+<div style='text-align:center; font-size:18px;'>
+👨‍💻 محمد أشرف حسين دسوقي  
+<br>
+🏫 جامعة شرق بورسعيد التكنولوجية  
+<br>
+🧭 قسم تكنولوجيا تشغيل وصيانة السفن  
+<br>
+🎓 إشراف: د. حسين المصري  
+</div>
+""", unsafe_allow_html=True)
 
-    if st.button("🚀 Enter AI System"):
+    st.markdown("<h3 style='text-align:center;color:#00e5ff;'>AI Engineering Decision & Simulation System</h3>", unsafe_allow_html=True)
+
+    if st.button("▶ START EXPERIENCE"):
         st.session_state.start = True
         st.rerun()
 
     st.stop()
 
-# ================= AI MODEL =================
+# ================= AI ENGINE =================
 X = np.array([
     [1.5, 15, 4, 1200],
     [2.0, 20, 5, 1500],
@@ -47,96 +53,100 @@ X = np.array([
 y = np.array([0.72, 0.70, 0.78, 0.85, 0.88])
 
 scaler = StandardScaler()
-X_scaled = scaler.fit_transform(X)
+X = scaler.fit_transform(X)
 
-model = RandomForestRegressor(n_estimators=400, random_state=42)
-model.fit(X_scaled, y)
+model = RandomForestRegressor(n_estimators=300, random_state=42)
+model.fit(X, y)
 
-# ================= SIDEBAR =================
-st.sidebar.title("⚙️ Control Panel")
+# ================= CONTROL =================
+st.sidebar.title("⚙ Control Panel")
 
 speed = st.sidebar.slider("Ship Speed", 5, 50, 20)
-blades = st.sidebar.selectbox("Blades", [3,4,5,6])
+blades = st.sidebar.selectbox("Blade Count", [3,4,5,6])
 diameter = st.sidebar.slider("Diameter", 0.5, 10.0, 2.0)
 rpm = st.sidebar.slider("RPM", 100, 3000, 1500)
 
-# ================= GENERATE 10 DESIGNS =================
-st.header("🧠 AI Multi-Design Optimization Engine")
+# ================= AI GENERATION =================
+st.header("🧠 AI Optimization Core")
 
 designs = []
 
 for i in range(10):
 
-    d = diameter + random.uniform(-0.5, 0.5)
-    s = speed + random.uniform(-7, 7)
+    d = diameter + random.uniform(-0.4, 0.4)
+    s = speed + random.uniform(-5, 5)
     b = blades
-    r = rpm + random.randint(-300, 300)
+    r = rpm + random.randint(-200, 200)
 
     inp = scaler.transform([[d, s, b, r]])
     eff = model.predict(inp)[0]
 
-    score = eff * 0.6 + (1 - abs(s-20)/50)*0.2 + (d/10)*0.2
+    score = eff * 0.7 + (1 - abs(s-20)/50)*0.3
 
     designs.append({
         "id": i,
-        "diameter": d,
-        "speed": s,
-        "blades": b,
-        "rpm": r,
+        "d": d,
+        "s": s,
+        "b": b,
+        "r": r,
         "eff": eff,
         "score": score
     })
 
 best = max(designs, key=lambda x: x["score"])
 
-st.success("🏆 Best AI-Optimized Design Selected")
-
+# ================= METRICS =================
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Efficiency", f"{best['eff']*100:.2f}%")
-col2.metric("Score", f"{best['score']:.3f}")
-col3.metric("RPM", best["rpm"])
+col1.metric("⚡ Efficiency", f"{best['eff']*100:.2f}%")
+col2.metric("🏆 AI Score", f"{best['score']:.3f}")
+col3.metric("🔄 RPM", best["r"])
 
-# ================= COMPARISON TABLE =================
-st.subheader("📊 AI Design Comparison")
+# ================= CINEMATIC SIMULATION =================
+st.header("🌊 Real-Time Propeller Simulation")
 
-for d in designs:
-    st.write(f"Design {d['id']} → Efficiency: {d['eff']*100:.2f}% | Score: {d['score']:.3f}")
-
-# ================= 3D =================
-st.header("🧊 Advanced 3D Visualization")
-
-theta = np.linspace(0, 2*np.pi, 120)
-r = np.linspace(0.2, 1.2, 120)
-theta, r = np.meshgrid(theta, r)
+t = np.linspace(0, 2*np.pi, 200)
 
 fig = go.Figure()
 
-for i in range(best["blades"]):
+# WATER (smooth cinematic layer)
+wx = np.linspace(-2,2,30)
+wy = np.linspace(-2,2,30)
+WX, WY = np.meshgrid(wx,wy)
+WZ = np.sin(WX*2) * 0.05 + np.cos(WY*2)*0.05 - 0.5
 
-    angle = i * 2*np.pi/best["blades"]
+fig.add_trace(go.Surface(
+    x=WX,
+    y=WY,
+    z=WZ,
+    colorscale=[[0,"#0f172a"],[1,"#0ea5e9"]],
+    opacity=0.65,
+    showscale=False
+))
 
-    x = r * np.cos(theta)
-    y = r * np.sin(theta)
+# PROPELLER MOTION
+for i in range(best["b"]):
 
-    blade = np.sin(theta * 2) * (1 - r)
-    z = 0.3 * blade
+    angle = i * (2*np.pi/best["b"])
+
+    x = np.cos(t) * (1 - t/(2*np.pi))
+    y = np.sin(t) * (1 - t/(2*np.pi))
+    z = 0.3 * np.sin(3*t)
 
     xr = x*np.cos(angle) - y*np.sin(angle)
     yr = x*np.sin(angle) + y*np.cos(angle)
 
-    fig.add_trace(go.Surface(
+    fig.add_trace(go.Scatter3d(
         x=xr,
         y=yr,
         z=z,
-        colorscale="Turbo",
-        showscale=False,
-        opacity=0.9
+        mode='lines',
+        line=dict(color="#00ffff", width=5)
     ))
 
 fig.update_layout(
     template="plotly_dark",
-    height=650,
+    height=720,
     scene=dict(
         xaxis=dict(visible=False),
         yaxis=dict(visible=False),
@@ -146,45 +156,34 @@ fig.update_layout(
 
 st.plotly_chart(fig, use_container_width=True)
 
-# ================= FLOW =================
-st.header("🌊 Flow Field Simulation")
-
-n = 60
-x = np.linspace(-2,2,n)
-y = np.linspace(-2,2,n)
-X, Y = np.meshgrid(x,y)
-
-R = np.sqrt(X**2 + Y**2) + 0.1
-U = -Y / R + np.sin(X)
-V = X / R + np.cos(Y)
-
-fig2, ax = plt.subplots()
-ax.streamplot(X, Y, U, V, color=np.sqrt(U**2+V**2), cmap="plasma")
-ax.set_title("Hydrodynamic Flow Field")
-st.pyplot(fig2)
-
 # ================= REPORT =================
-st.header("📄 AI Report Summary")
+st.header("📄 AI Engineering Report")
 
 st.code(f"""
-AI MARINE OPTIMIZATION REPORT
+MARINE AI CINEMATIC SYSTEM REPORT
+----------------------------------
 
 Best Design ID: {best['id']}
-Efficiency: {best['eff']*100:.2f}%
-Score: {best['score']:.3f}
 
-Parameters:
-- Diameter: {best['diameter']:.2f}
-- Speed: {best['speed']:.2f}
-- Blades: {best['blades']}
-- RPM: {best['rpm']}
+Performance:
+- Efficiency: {best['eff']*100:.2f}%
+- AI Score: {best['score']:.3f}
 
-Conclusion:
-AI selected optimal marine propeller configuration
-based on multi-variable engineering analysis.
+Configuration:
+- Diameter: {best['d']:.2f} m
+- Speed: {best['s']:.2f} knots
+- Blades: {best['b']}
+- RPM: {best['r']}
+
+System Result:
+✔ AI optimized marine propeller design
+✔ Real-time hydrodynamic simulation
+✔ Engineering decision support output
+
+Status: CINEMATIC DEMO READY
 """)
 
 # ================= FOOTER =================
 st.markdown("---")
-st.markdown("### 🚀 AI Marine Engineering Pro System")
-st.markdown("👨‍💻 Mohamed Ashraf Hussein Desouky")
+st.markdown("<h4 style='text-align:center;'>⚓ Marine AI Cinematic System</h4>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center;'>👨‍💻 Mohamed Ashraf Hussein Desouky</p>", unsafe_allow_html=True)
